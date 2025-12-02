@@ -42,7 +42,7 @@ namespace BPME.BPM.Host.Core.Data.Entities
         /// Результат выполнения (JSON)
         /// </summary>
         public string? OutputResultJson { get; set; }
-
+        
         /// <summary>
         /// Сообщение об ошибке (если Failed)
         /// </summary>

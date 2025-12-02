@@ -9,6 +9,7 @@ namespace BPME.BPM.Host.Core.Data.Entities
     {
         public Guid Id { get; set; }
 
+        // Лишнее
         /// <summary>
         /// Внешний ключ на процесс
         /// </summary>
@@ -29,6 +30,7 @@ namespace BPME.BPM.Host.Core.Data.Entities
         /// </summary>
         public string? Description { get; set; }
 
+        // Это будет определяться Классом (типом шага)
         /// <summary>
         /// Тип шага (HttpRequest, RabbitMQ, SubProcess, etc.)
         /// </summary>
@@ -39,11 +41,13 @@ namespace BPME.BPM.Host.Core.Data.Entities
         /// </summary>
         public string? NextStepIdsJson { get; set; }
 
+        // Каждый тип шага будет иметь свою модель
         /// <summary>
         /// Настройки шага (JSON)
         /// </summary>
         public string? SettingsJson { get; set; }
 
+        // Для этого будет реализован отдельный сервис, который будет работать с сотоянием, а настройки шага будут имет ьключ к нему
         /// <summary>
         /// Маппинг входных данных
         /// </summary>

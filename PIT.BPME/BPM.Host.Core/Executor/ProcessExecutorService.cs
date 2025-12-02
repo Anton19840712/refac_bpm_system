@@ -1,3 +1,4 @@
+using BPME.BPM.Host.Core.Executor.Steps;
 using BPME.BPM.Host.Core.Interfaces;
 using BPME.BPM.Host.Core.Models.Configurations;
 using BPME.BPM.Host.Core.State;
@@ -19,19 +20,23 @@ namespace BPME.BPM.Host.Core.Executor
     ///
     /// Lifetime: Scoped (создаётся для каждого запуска процесса)
     /// </summary>
+    /// 
     public class ProcessExecutorService : IExecutor<ProcessConfig>
     {
         private readonly ILogger<ProcessExecutorService> _logger;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly StepExecutorFactory _stepExecutorFactory;
         private ProcessState _processState = null!;
         private object? _outputValue;
 
         public ProcessExecutorService(
             ILogger<ProcessExecutorService> logger,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            StepExecutorFactory stepExecutorFactory)
         {
             _logger = logger;
             _loggerFactory = loggerFactory;
+            _stepExecutorFactory = stepExecutorFactory;
         }
 
         /// <inheritdoc />
@@ -151,6 +156,7 @@ namespace BPME.BPM.Host.Core.Executor
             // 3. Создаём исполнитель шага
             var stepExecutor = new StepExecutorService(
                 stepState,
+                _stepExecutorFactory,
                 _loggerFactory.CreateLogger<StepExecutorService>())
             {
                 InputValue = stepInput

@@ -2,6 +2,7 @@ using BPME.BPM.Host.Core.Configuration;
 using BPME.BPM.Host.Core.Data;
 using BPME.BPM.Host.Core.DataBus;
 using BPME.BPM.Host.Core.Executor;
+using BPME.BPM.Host.Core.Executor.Steps;
 using BPME.BPM.Host.Core.Interfaces;
 using BPME.BPM.Host.Core.Models.Configurations;
 using BPME.BPM.Host.Core.Repositories;
@@ -52,6 +53,19 @@ builder.Services.AddScoped<IConfigureService<ProcessConfig>, ProcessConfigServic
 // Исполнитель процесса (Scoped) — создаётся для каждого запуска процесса
 builder.Services.AddScoped<ProcessExecutorService>();
 
+// === Step Executors (SAMPLE - будут отрефакторены) ===
+
+// HttpClient для HTTP-запросов
+builder.Services.AddHttpClient();
+
+// Регистрация executor'ов — каждый обрабатывает свой StepType
+builder.Services.AddScoped<IStepExecutor, SampleStepExecutor>();
+builder.Services.AddScoped<IStepExecutor, HttpRequestStepExecutor>();
+builder.Services.AddScoped<IStepExecutor, ScriptStepExecutor>();
+
+// Фабрика — резолвит executor по StepType
+builder.Services.AddScoped<StepExecutorFactory>();
+
 // Слушатель состояния (HostedService) — обрабатывает запросы из очереди
 builder.Services.AddHostedService<BPMStateListener>();
 
@@ -61,9 +75,9 @@ builder.Services.AddHostedService<BPMStateListener>();
 builder.Services.Configure<RabbitMqOptions>(
     builder.Configuration.GetSection(RabbitMqOptions.SectionName));
 
-// RabbitMQ listener (HostedService) — получает запросы из очереди сообщений
-// Включается через RabbitMQ:Enabled = true в конфигурации
-builder.Services.AddHostedService<RabbitMqListener>();
+// RabbitMQ Listener Factory — создаёт слушатели для каждой очереди из конфигурации
+// Конфигурация: RabbitMQ:Queues[]
+builder.Services.AddHostedService<RabbitMqListenerFactory>();
 
 // === Тестирование (только Development) ===
 

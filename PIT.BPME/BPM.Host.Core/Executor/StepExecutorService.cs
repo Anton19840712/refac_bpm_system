@@ -1,3 +1,4 @@
+using BPME.BPM.Host.Core.Executor.Steps;
 using BPME.BPM.Host.Core.Interfaces;
 using BPME.BPM.Host.Core.Models.Configurations;
 using BPME.BPM.Host.Core.State;
@@ -22,16 +23,22 @@ namespace BPME.BPM.Host.Core.Executor
     {
         private readonly ILogger<StepExecutorService> _logger;
         private readonly StepState _stepState;
+        private readonly StepExecutorFactory _stepExecutorFactory;
         private object? _outputValue;
 
         /// <summary>
         /// Создаёт исполнитель для конкретного шага
         /// </summary>
         /// <param name="stepState">Состояние шага (создаётся ProcessExecutorService)</param>
+        /// <param name="stepExecutorFactory">Фабрика executor'ов по типу шага</param>
         /// <param name="logger">Логгер</param>
-        public StepExecutorService(StepState stepState, ILogger<StepExecutorService> logger)
+        public StepExecutorService(
+            StepState stepState,
+            StepExecutorFactory stepExecutorFactory,
+            ILogger<StepExecutorService> logger)
         {
             _stepState = stepState;
+            _stepExecutorFactory = stepExecutorFactory;
             _logger = logger;
         }
 
@@ -83,126 +90,88 @@ namespace BPME.BPM.Host.Core.Executor
         }
 
         /// <summary>
-        /// Выполняет действие шага в зависимости от его типа.
-        ///
-        /// Это точка расширения — здесь добавляются новые типы шагов.
-        /// В будущем можно вынести в отдельные классы через DI.
+        /// Выполняет действие шага через StepExecutorFactory.
+        /// Фабрика резолвит нужный IStepExecutor по StepType.
         /// </summary>
         private async Task<object?> ExecuteStepByTypeAsync(StepConfig config, CancellationToken cancellationToken)
         {
-            return config.StepType.ToLowerInvariant() switch
+            var stepType = config.StepType;
+
+            // Пытаемся найти executor через фабрику
+            var executor = _stepExecutorFactory.GetExecutor(stepType);
+
+            if (executor != null)
             {
-                "httprequest" => await ExecuteHttpRequestAsync(config, cancellationToken),
-                "rabbitmq" => await ExecuteRabbitMQAsync(config, cancellationToken),
-                "subprocess" => await ExecuteSubProcessAsync(config, cancellationToken),
-                "script" => await ExecuteScriptAsync(config, cancellationToken),
-                "delay" => await ExecuteDelayAsync(config, cancellationToken),
-                _ => await ExecuteDefaultAsync(config, cancellationToken)
-            };
-        }
+                // Подготавливаем входные данные как Dictionary
+                var inputData = InputValue as Dictionary<string, object>
+                    ?? ConvertToInputDictionary(InputValue);
 
-        #region Реализации типов шагов (заглушки для примера)
+                // Сериализуем Settings в JSON для executor'а
+                var settingsJson = config.Settings != null
+                    ? System.Text.Json.JsonSerializer.Serialize(config.Settings)
+                    : null;
 
-        /// <summary>
-        /// Выполнение HTTP-запроса.
-        /// TODO: Реализовать с использованием HttpClient
-        /// </summary>
-        private async Task<object?> ExecuteHttpRequestAsync(StepConfig config, CancellationToken cancellationToken)
-        {
-            _logger.LogDebug("Шаг {StepId}: выполнение HTTP-запроса", config.PublicId);
+                // Выполняем через IStepExecutor
+                var result = await executor.ExecuteAsync(
+                    settingsJson,
+                    inputData,
+                    cancellationToken);
 
-            // Заглушка — имитация HTTP-запроса
-            await Task.Delay(100, cancellationToken);
+                if (!result.IsSuccess)
+                {
+                    throw new InvalidOperationException(
+                        $"Шаг {config.PublicId} ({stepType}) завершился с ошибкой: {result.ErrorMessage}");
+                }
 
-            return new
-            {
-                StatusCode = 200,
-                Body = $"Response from HTTP step {config.PublicId}",
-                ExecutedAt = DateTime.UtcNow
-            };
-        }
-
-        /// <summary>
-        /// Отправка сообщения в RabbitMQ.
-        /// TODO: Реализовать с использованием RabbitMQ.Client
-        /// </summary>
-        private async Task<object?> ExecuteRabbitMQAsync(StepConfig config, CancellationToken cancellationToken)
-        {
-            _logger.LogDebug("Шаг {StepId}: отправка в RabbitMQ", config.PublicId);
-
-            await Task.Delay(50, cancellationToken);
-
-            return new
-            {
-                MessageId = Guid.NewGuid(),
-                Published = true,
-                ExecutedAt = DateTime.UtcNow
-            };
-        }
-
-        /// <summary>
-        /// Вызов подпроцесса.
-        /// TODO: Реализовать через рекурсивный вызов ProcessExecutorService
-        /// </summary>
-        private async Task<object?> ExecuteSubProcessAsync(StepConfig config, CancellationToken cancellationToken)
-        {
-            _logger.LogDebug("Шаг {StepId}: запуск подпроцесса", config.PublicId);
-
-            await Task.Delay(100, cancellationToken);
-
-            return new
-            {
-                SubProcessId = Guid.NewGuid(),
-                Status = "Completed",
-                ExecutedAt = DateTime.UtcNow
-            };
-        }
-
-        /// <summary>
-        /// Выполнение скрипта.
-        /// TODO: Реализовать интерпретатор скриптов
-        /// </summary>
-        private async Task<object?> ExecuteScriptAsync(StepConfig config, CancellationToken cancellationToken)
-        {
-            _logger.LogDebug("Шаг {StepId}: выполнение скрипта", config.PublicId);
-
-            await Task.Delay(50, cancellationToken);
-
-            return new
-            {
-                ScriptResult = "OK",
-                ExecutedAt = DateTime.UtcNow
-            };
-        }
-
-        /// <summary>
-        /// Задержка (для тестирования).
-        /// </summary>
-        private async Task<object?> ExecuteDelayAsync(StepConfig config, CancellationToken cancellationToken)
-        {
-            var delayMs = 1000;
-            if (config.Settings?.TryGetValue("delayMs", out var value) == true && value is int ms)
-            {
-                delayMs = ms;
+                return result.Output;
             }
 
-            _logger.LogDebug("Шаг {StepId}: задержка {DelayMs}ms", config.PublicId, delayMs);
+            // Fallback: если executor не найден — используем заглушку
+            _logger.LogWarning(
+                "Шаг {StepId}: executor для типа '{StepType}' не найден, используется заглушка",
+                config.PublicId,
+                stepType);
 
-            await Task.Delay(delayMs, cancellationToken);
-
-            return new
-            {
-                DelayMs = delayMs,
-                ExecutedAt = DateTime.UtcNow
-            };
+            return await ExecuteFallbackAsync(config, cancellationToken);
         }
 
         /// <summary>
-        /// Действие по умолчанию (для неизвестных типов).
+        /// Конвертирует входные данные в Dictionary для IStepExecutor
         /// </summary>
-        private async Task<object?> ExecuteDefaultAsync(StepConfig config, CancellationToken cancellationToken)
+        private Dictionary<string, object>? ConvertToInputDictionary(object? input)
         {
-            _logger.LogDebug("Шаг {StepId}: выполнение (тип: {StepType})", config.PublicId, config.StepType);
+            if (input == null) return null;
+
+            if (input is Dictionary<string, object> dict)
+                return dict;
+
+            // Пробуем сконвертировать из JSON
+            if (input is System.Text.Json.JsonElement jsonElement)
+            {
+                var result = new Dictionary<string, object>();
+                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+                {
+                    foreach (var prop in jsonElement.EnumerateObject())
+                    {
+                        result[prop.Name] = prop.Value;
+                    }
+                }
+                return result;
+            }
+
+            // Оборачиваем как единственное значение
+            return new Dictionary<string, object> { ["value"] = input };
+        }
+
+        /// <summary>
+        /// Fallback для неизвестных типов шагов (когда нет executor'а)
+        /// </summary>
+        private async Task<object?> ExecuteFallbackAsync(StepConfig config, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug(
+                "Шаг {StepId}: fallback выполнение (тип: {StepType})",
+                config.PublicId,
+                config.StepType);
 
             await Task.Delay(50, cancellationToken);
 
@@ -210,10 +179,10 @@ namespace BPME.BPM.Host.Core.Executor
             {
                 Input = InputValue,
                 StepId = config.PublicId,
-                ExecutedAt = DateTime.UtcNow
+                StepType = config.StepType,
+                ExecutedAt = DateTime.UtcNow,
+                Warning = "Executor not found, fallback used"
             };
         }
-
-        #endregion
     }
 }

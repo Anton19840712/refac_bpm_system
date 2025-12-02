@@ -15,6 +15,8 @@ namespace BPME.BPM.Host.Core.State
     ///
     /// Lifetime: Scoped (создаётся для каждого запущенного процесса)
     /// </summary>
+    /// 
+    // По состоянию я еще сам доделаю, когда появится маппинг, его одна из задач - работа с состоянием
     public class ProcessState : IState<ProcessStateModel>
     {
         private readonly ProcessStateModel _state;

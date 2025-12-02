@@ -39,9 +39,10 @@ namespace BPME.BPM.Host.Core.Data.Entities
         /// </summary>
         public string? StartStepId { get; set; }
 
+        // У настроеек должны быть свои модели и таблицы
         /// <summary>
         /// Настройки в формате JSON
-        /// </summary>
+        /// </summary>        
         public string? SettingsJson { get; set; }
 
         /// <summary>
