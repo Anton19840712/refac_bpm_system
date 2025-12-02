@@ -1,8 +1,8 @@
 {
   "publicId": "test-simple-linear",
   "name": "Простой линейный процесс",
-  "description": "Три шага выполняются последовательно: A -> B -> C",
-  "version": 1,
+  "description": "Три шага выполняются последовательно: A -> B -> C (через sample executor)",
+  "version": 2,
   "isActive": true,
   "startStepId": "step-a",
   "timeoutSeconds": 60,
@@ -11,31 +11,43 @@
       "publicId": "step-a",
       "name": "Шаг A",
       "description": "Первый шаг",
-      "stepType": "Default",
+      "stepType": "sample",
       "nextStepIds": ["step-b"],
       "order": 1,
       "timeoutSeconds": 10,
-      "retryCount": 0
+      "retryCount": 0,
+      "settings": {
+        "message": "Привет из шага A!",
+        "delayMs": 100
+      }
     },
     {
       "publicId": "step-b",
       "name": "Шаг B",
       "description": "Второй шаг",
-      "stepType": "Default",
+      "stepType": "sample",
       "nextStepIds": ["step-c"],
       "order": 2,
       "timeoutSeconds": 10,
-      "retryCount": 0
+      "retryCount": 0,
+      "settings": {
+        "message": "Привет из шага B!",
+        "delayMs": 100
+      }
     },
     {
       "publicId": "step-c",
       "name": "Шаг C",
       "description": "Третий шаг (финальный)",
-      "stepType": "Default",
+      "stepType": "sample",
       "nextStepIds": [],
       "order": 3,
       "timeoutSeconds": 10,
-      "retryCount": 0
+      "retryCount": 0,
+      "settings": {
+        "message": "Финальный шаг C!",
+        "delayMs": 100
+      }
     }
   ]
 }

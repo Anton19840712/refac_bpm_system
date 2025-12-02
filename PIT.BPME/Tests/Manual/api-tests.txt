@@ -1,0 +1,54 @@
+================================================================================
+БАЗОВЫЕ ПРОВЕРКИ
+================================================================================
+
+Health
+curl http://localhost:5220/health
+
+Get configs
+curl http://localhost:5220/api/configure
+
+================================================================================
+STEP EXECUTORS (изолированное тестирование)
+================================================================================
+
+Get step executors (список зарегистрированных типов)
+curl http://localhost:5220/api/test/executors
+
+Run all step executors
+curl -X POST http://localhost:5220/api/test/executors/run-all
+
+Run sample executor
+curl -X POST http://localhost:5220/api/test/executors/sample -H "Content-Type: application/json" -d "{\"inputData\":{\"key\":\"value\"}}"
+
+Run sample executor with settings
+curl -X POST http://localhost:5220/api/test/executors/sample -H "Content-Type: application/json" -d "{\"settingsJson\":\"{\\\"message\\\":\\\"Hello from test!\\\",\\\"delayMs\\\":50}\",\"inputData\":{\"userId\":123}}"
+
+Run http-request executor
+curl -X POST http://localhost:5220/api/test/executors/http-request -H "Content-Type: application/json" -d "{\"settingsJson\":\"{\\\"url\\\":\\\"https://httpbin.org/get\\\",\\\"method\\\":\\\"GET\\\"}\"}"
+
+================================================================================
+ПОЛНАЯ ЦЕПОЧКА (процесс -> шаги -> executor'ы через фабрику)
+================================================================================
+
+Get available test configs
+curl http://localhost:5220/api/test/configs
+
+Run simple-linear process (3 шага с типом 'sample')
+curl -X POST http://localhost:5220/api/test/run/simple-linear.json
+
+Run parallel-steps process (параллельное выполнение)
+curl -X POST http://localhost:5220/api/test/run/parallel-steps.json
+
+Run all test processes
+curl -X POST http://localhost:5220/api/test/run-all
+
+Start process via API (не через тест-раннер)
+curl -X POST http://localhost:5220/api/process/start -H "Content-Type: application/json" -d "{\"processPublicId\":\"test-simple-linear\",\"correlationId\":\"test-001\",\"inputData\":{\"num\":42}}"
+
+================================================================================
+RABBITMQ (внешние тесты)
+================================================================================
+
+RabbitMQ send (filler)
+cd "C:\apps\динамический шлюз\20250807\dynamicgate integrations\integration-help-apps\rabbit\test-rabbit-queue-in-filler-app\filler" && dotnet run bpm 5
