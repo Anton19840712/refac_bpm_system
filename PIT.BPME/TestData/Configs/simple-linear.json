@@ -1,0 +1,41 @@
+{
+  "publicId": "test-simple-linear",
+  "name": "Простой линейный процесс",
+  "description": "Три шага выполняются последовательно: A -> B -> C",
+  "version": 1,
+  "isActive": true,
+  "startStepId": "step-a",
+  "timeoutSeconds": 60,
+  "steps": [
+    {
+      "publicId": "step-a",
+      "name": "Шаг A",
+      "description": "Первый шаг",
+      "stepType": "Default",
+      "nextStepIds": ["step-b"],
+      "order": 1,
+      "timeoutSeconds": 10,
+      "retryCount": 0
+    },
+    {
+      "publicId": "step-b",
+      "name": "Шаг B",
+      "description": "Второй шаг",
+      "stepType": "Default",
+      "nextStepIds": ["step-c"],
+      "order": 2,
+      "timeoutSeconds": 10,
+      "retryCount": 0
+    },
+    {
+      "publicId": "step-c",
+      "name": "Шаг C",
+      "description": "Третий шаг (финальный)",
+      "stepType": "Default",
+      "nextStepIds": [],
+      "order": 3,
+      "timeoutSeconds": 10,
+      "retryCount": 0
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "publicId": "test-with-settings",
+  "name": "Процесс с настройками",
+  "description": "Демонстрация передачи настроек в шаги",
+  "version": 1,
+  "isActive": true,
+  "startStepId": "step-http",
+  "timeoutSeconds": 90,
+  "settings": {
+    "notifyOnComplete": true,
+    "logLevel": "Debug"
+  },
+  "steps": [
+    {
+      "publicId": "step-http",
+      "name": "HTTP запрос",
+      "description": "Вызов внешнего API",
+      "stepType": "HttpRequest",
+      "nextStepIds": ["step-rabbitmq"],
+      "order": 1,
+      "timeoutSeconds": 30,
+      "settings": {
+        "url": "https://api.example.com/process",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      "inputMapping": "$.inputData"
+    },
+    {
+      "publicId": "step-rabbitmq",
+      "name": "Отправка в очередь",
+      "description": "Публикация результата в RabbitMQ",
+      "stepType": "RabbitMQ",
+      "nextStepIds": ["step-notify"],
+      "order": 2,
+      "timeoutSeconds": 10,
+      "settings": {
+        "exchange": "bpm.results",
+        "routingKey": "process.completed"
+      }
+    },
+    {
+      "publicId": "step-notify",
+      "name": "Уведомление",
+      "description": "Отправка уведомления о завершении",
+      "stepType": "Notification",
+      "nextStepIds": [],
+      "order": 3,
+      "timeoutSeconds": 10,
+      "settings": {
+        "channel": "email",
+        "template": "process-completed"
+      }
+    }
+  ]
+}

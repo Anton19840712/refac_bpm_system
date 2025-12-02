@@ -1,0 +1,61 @@
+{
+  "publicId": "test-parallel-steps",
+  "name": "Процесс с параллельными шагами",
+  "description": "A -> [B, C, D] -> E (B, C, D выполняются параллельно)",
+  "version": 1,
+  "isActive": true,
+  "startStepId": "step-start",
+  "timeoutSeconds": 120,
+  "steps": [
+    {
+      "publicId": "step-start",
+      "name": "Старт",
+      "description": "Начальный шаг, запускает параллельные ветки",
+      "stepType": "Default",
+      "nextStepIds": ["step-parallel-1", "step-parallel-2", "step-parallel-3"],
+      "order": 1,
+      "timeoutSeconds": 10,
+      "retryCount": 0
+    },
+    {
+      "publicId": "step-parallel-1",
+      "name": "Параллельный шаг 1",
+      "description": "Выполняется параллельно с шагами 2 и 3",
+      "stepType": "Default",
+      "nextStepIds": ["step-finish"],
+      "order": 2,
+      "timeoutSeconds": 15,
+      "retryCount": 0
+    },
+    {
+      "publicId": "step-parallel-2",
+      "name": "Параллельный шаг 2",
+      "description": "Выполняется параллельно с шагами 1 и 3",
+      "stepType": "Default",
+      "nextStepIds": ["step-finish"],
+      "order": 3,
+      "timeoutSeconds": 15,
+      "retryCount": 0
+    },
+    {
+      "publicId": "step-parallel-3",
+      "name": "Параллельный шаг 3",
+      "description": "Выполняется параллельно с шагами 1 и 2",
+      "stepType": "Default",
+      "nextStepIds": ["step-finish"],
+      "order": 4,
+      "timeoutSeconds": 15,
+      "retryCount": 0
+    },
+    {
+      "publicId": "step-finish",
+      "name": "Финиш",
+      "description": "Финальный шаг после завершения всех параллельных",
+      "stepType": "Default",
+      "nextStepIds": [],
+      "order": 5,
+      "timeoutSeconds": 10,
+      "retryCount": 0
+    }
+  ]
+}
