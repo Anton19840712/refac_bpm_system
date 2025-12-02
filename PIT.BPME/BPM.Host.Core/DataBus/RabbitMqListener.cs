@@ -1,9 +1,7 @@
 using BPME.BPM.Host.Core.Configuration;
 using BPME.BPM.Host.Core.Interfaces;
 using BPME.BPM.Host.Core.Models.Configurations;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -12,28 +10,15 @@ using System.Text.Json;
 namespace BPME.BPM.Host.Core.DataBus
 {
     /// <summary>
-    /// Слушатель RabbitMQ для получения запросов на запуск процессов.
-    ///
-    /// Схема работы:
-    /// 1. Подключается к RabbitMQ при старте приложения
-    /// 2. Слушает очередь bpm.process.start
-    /// 3. При получении сообщения — парсит JSON в StartRequest
-    /// 4. Вызывает IBPMState.EnqueueRequest()
-    ///
-    /// Формат сообщения (JSON):
-    /// {
-    ///     "processPublicId": "order-process",
-    ///     "correlationId": "unique-id-123",
-    ///     "inputData": { "orderId": 123 }
-    /// }
-    ///
-    /// На схеме это IDataBusListener → RabbitMQ.
+    /// Слушатель одной очереди RabbitMQ.
+    /// Создаётся фабрикой RabbitMqListenerFactory для каждой очереди из конфигурации.
     /// </summary>
-    public class RabbitMqListener : IDataBusListener, IHostedService, IDisposable
+    public class RabbitMqListener : IDataBusListener, IDisposable
     {
         private readonly IBPMState _bpmState;
-        private readonly RabbitMqOptions _options;
-        private readonly ILogger<RabbitMqListener> _logger;
+        private readonly RabbitMqOptions _connectionOptions;
+        private readonly QueueListenerConfig _queueConfig;
+        private readonly ILogger _logger;
 
         private IConnection? _connection;
         private IChannel? _channel;
@@ -47,41 +32,39 @@ namespace BPME.BPM.Host.Core.DataBus
 
         public RabbitMqListener(
             IBPMState bpmState,
-            IOptions<RabbitMqOptions> options,
-            ILogger<RabbitMqListener> logger)
+            RabbitMqOptions connectionOptions,
+            QueueListenerConfig queueConfig,
+            ILogger logger)
         {
             _bpmState = bpmState;
-            _options = options.Value;
+            _connectionOptions = connectionOptions;
+            _queueConfig = queueConfig;
             _logger = logger;
         }
+
+        /// <summary>
+        /// Имя очереди, которую слушает этот listener
+        /// </summary>
+        public string QueueName => _queueConfig.QueueName;
 
         /// <inheritdoc />
         public bool IsConnected => _connection?.IsOpen ?? false;
 
         /// <inheritdoc />
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartListeningAsync(CancellationToken cancellationToken = default)
         {
-            if (!_options.Enabled)
+            if (!_queueConfig.Enabled)
             {
-                _logger.LogInformation("RabbitMQ listener отключён в конфигурации");
+                _logger.LogInformation(
+                    "Слушатель очереди {Queue} отключён в конфигурации",
+                    _queueConfig.QueueName);
                 return;
             }
 
-            await StartListeningAsync(cancellationToken);
-        }
-
-        /// <inheritdoc />
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            await StopListeningAsync(cancellationToken);
-        }
-
-        /// <inheritdoc />
-        public async Task StartListeningAsync(CancellationToken cancellationToken = default)
-        {
             _logger.LogInformation(
-                "Подключение к RabbitMQ: {Host}:{Port}",
-                _options.Host, _options.Port);
+                "Подключение к очереди {Queue} ({Description})",
+                _queueConfig.QueueName,
+                _queueConfig.Description ?? "без описания");
 
             try
             {
@@ -89,12 +72,13 @@ namespace BPME.BPM.Host.Core.DataBus
                 await SetupConsumerAsync(cancellationToken);
 
                 _logger.LogInformation(
-                    "RabbitMQ listener запущен. Очередь: {Queue}",
-                    _options.QueueName);
+                    "Слушатель запущен: {Queue} → {ProcessId}",
+                    _queueConfig.QueueName,
+                    _queueConfig.ProcessPublicId ?? "из сообщения");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка подключения к RabbitMQ");
+                _logger.LogError(ex, "Ошибка подключения к очереди {Queue}", _queueConfig.QueueName);
                 throw;
             }
         }
@@ -102,66 +86,60 @@ namespace BPME.BPM.Host.Core.DataBus
         /// <inheritdoc />
         public Task StopListeningAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Остановка RabbitMQ listener...");
-
+            _logger.LogInformation("Остановка слушателя очереди {Queue}...", _queueConfig.QueueName);
             Dispose();
-
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Подключение с повторными попытками
-        /// </summary>
         private async Task ConnectWithRetryAsync(CancellationToken cancellationToken)
         {
             var factory = new ConnectionFactory
             {
-                HostName = _options.Host,
-                Port = _options.Port,
-                UserName = _options.Username,
-                Password = _options.Password,
-                VirtualHost = _options.VirtualHost
+                HostName = _connectionOptions.Host,
+                Port = _connectionOptions.Port,
+                UserName = _connectionOptions.Username,
+                Password = _connectionOptions.Password,
+                VirtualHost = _connectionOptions.VirtualHost
             };
 
-            for (int attempt = 1; attempt <= _options.RetryCount; attempt++)
+            for (int attempt = 1; attempt <= _connectionOptions.RetryCount; attempt++)
             {
                 try
                 {
                     _connection = await factory.CreateConnectionAsync(cancellationToken);
                     _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-                    // Объявляем очередь (создастся, если не существует)
                     await _channel.QueueDeclareAsync(
-                        queue: _options.QueueName,
+                        queue: _queueConfig.QueueName,
                         durable: true,
                         exclusive: false,
                         autoDelete: false,
                         arguments: null,
                         cancellationToken: cancellationToken);
 
-                    _logger.LogInformation("Подключено к RabbitMQ (попытка {Attempt})", attempt);
+                    _logger.LogDebug(
+                        "Подключено к {Queue} (попытка {Attempt})",
+                        _queueConfig.QueueName, attempt);
                     return;
                 }
-                catch (Exception ex) when (attempt < _options.RetryCount)
+                catch (Exception ex) when (attempt < _connectionOptions.RetryCount)
                 {
                     _logger.LogWarning(
                         ex,
-                        "Не удалось подключиться к RabbitMQ (попытка {Attempt}/{Max}). Повтор через {Delay} сек.",
-                        attempt, _options.RetryCount, _options.RetryDelaySeconds);
+                        "Не удалось подключиться к {Queue} (попытка {Attempt}/{Max})",
+                        _queueConfig.QueueName, attempt, _connectionOptions.RetryCount);
 
-                    await Task.Delay(TimeSpan.FromSeconds(_options.RetryDelaySeconds), cancellationToken);
+                    await Task.Delay(
+                        TimeSpan.FromSeconds(_connectionOptions.RetryDelaySeconds),
+                        cancellationToken);
                 }
             }
         }
 
-        /// <summary>
-        /// Настройка consumer'а
-        /// </summary>
         private async Task SetupConsumerAsync(CancellationToken cancellationToken)
         {
             if (_channel == null) return;
 
-            // Prefetch = 1: обрабатываем по одному сообщению
             await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false, cancellationToken);
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -171,69 +149,65 @@ namespace BPME.BPM.Host.Core.DataBus
                 try
                 {
                     await ProcessMessageAsync(ea);
-
-                    // Подтверждаем обработку
                     await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Ошибка обработки сообщения");
-
-                    // Отклоняем без requeue (чтобы не зациклиться)
+                    _logger.LogError(ex, "Ошибка обработки сообщения из {Queue}", _queueConfig.QueueName);
                     await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
                 }
             };
 
             await _channel.BasicConsumeAsync(
-                queue: _options.QueueName,
+                queue: _queueConfig.QueueName,
                 autoAck: false,
                 consumer: consumer,
                 cancellationToken: cancellationToken);
         }
 
-        /// <summary>
-        /// Обработка входящего сообщения
-        /// </summary>
         private Task ProcessMessageAsync(BasicDeliverEventArgs ea)
         {
             var body = ea.Body.ToArray();
             var json = Encoding.UTF8.GetString(body);
 
-            _logger.LogDebug("Получено сообщение: {Json}", json);
+            _logger.LogDebug("[{Queue}] Получено: {Json}", _queueConfig.QueueName, json);
 
             var request = JsonSerializer.Deserialize<StartRequest>(json, JsonOptions);
 
             if (request == null)
             {
-                _logger.LogWarning("Не удалось десериализовать сообщение: {Json}", json);
+                _logger.LogWarning("[{Queue}] Не удалось десериализовать: {Json}",
+                    _queueConfig.QueueName, json);
                 return Task.CompletedTask;
+            }
+
+            // Если в конфиге очереди указан ProcessPublicId - используем его
+            if (!string.IsNullOrEmpty(_queueConfig.ProcessPublicId))
+            {
+                request.ProcessPublicId = _queueConfig.ProcessPublicId;
             }
 
             if (string.IsNullOrEmpty(request.ProcessPublicId))
             {
-                _logger.LogWarning("Сообщение без ProcessPublicId: {Json}", json);
+                _logger.LogWarning("[{Queue}] Сообщение без ProcessPublicId: {Json}",
+                    _queueConfig.QueueName, json);
                 return Task.CompletedTask;
             }
 
-            // Генерируем CorrelationId, если не передан
             if (string.IsNullOrEmpty(request.CorrelationId))
             {
                 request.CorrelationId = Guid.NewGuid().ToString();
             }
 
             _logger.LogInformation(
-                "RabbitMQ → EnqueueRequest: {ProcessPublicId}, CorrelationId: {CorrelationId}",
-                request.ProcessPublicId, request.CorrelationId);
+                "[{Queue}] → EnqueueRequest: {ProcessPublicId}, CorrelationId: {CorrelationId}",
+                _queueConfig.QueueName, request.ProcessPublicId, request.CorrelationId);
 
-            // Добавляем в очередь на выполнение
             _bpmState.EnqueueRequest(request);
 
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Освобождение ресурсов
-        /// </summary>
         public void Dispose()
         {
             if (_disposed) return;
@@ -242,8 +216,7 @@ namespace BPME.BPM.Host.Core.DataBus
             _connection?.Dispose();
 
             _disposed = true;
-
-            _logger.LogInformation("RabbitMQ listener остановлен");
+            _logger.LogDebug("Слушатель {Queue} остановлен", _queueConfig.QueueName);
         }
     }
 }

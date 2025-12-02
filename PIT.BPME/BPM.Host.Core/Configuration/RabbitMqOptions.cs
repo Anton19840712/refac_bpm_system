@@ -38,12 +38,7 @@ namespace BPME.BPM.Host.Core.Configuration
         public string VirtualHost { get; set; } = "/";
 
         /// <summary>
-        /// Имя очереди для получения запросов на запуск процессов
-        /// </summary>
-        public string QueueName { get; set; } = "bpm.process.start";
-
-        /// <summary>
-        /// Включён ли listener (можно отключить через конфигурацию)
+        /// Включены ли слушатели RabbitMQ
         /// </summary>
         public bool Enabled { get; set; } = true;
 
@@ -56,5 +51,38 @@ namespace BPME.BPM.Host.Core.Configuration
         /// Задержка между попытками подключения (секунды)
         /// </summary>
         public int RetryDelaySeconds { get; set; } = 5;
+
+        /// <summary>
+        /// Список очередей для прослушивания.
+        /// Каждая очередь = отдельная интеграция.
+        /// </summary>
+        public List<QueueListenerConfig> Queues { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Конфигурация отдельной очереди для прослушивания
+    /// </summary>
+    public class QueueListenerConfig
+    {
+        /// <summary>
+        /// Имя очереди в RabbitMQ
+        /// </summary>
+        public string QueueName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// PublicId процесса, который будет запускаться для сообщений из этой очереди.
+        /// Если null - используется processPublicId из самого сообщения.
+        /// </summary>
+        public string? ProcessPublicId { get; set; }
+
+        /// <summary>
+        /// Включён ли этот слушатель
+        /// </summary>
+        public bool Enabled { get; set; } = true;
+
+        /// <summary>
+        /// Описание интеграции (для логов и документации)
+        /// </summary>
+        public string? Description { get; set; }
     }
 }
