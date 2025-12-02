@@ -59,7 +59,6 @@
 	<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
 
 	<!-- OpenTelemetry (OTL) для метрик и мониторинга -->
-	<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.13.1" />
 	<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
 	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
 	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />

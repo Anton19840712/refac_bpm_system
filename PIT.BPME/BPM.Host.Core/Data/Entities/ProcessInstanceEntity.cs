@@ -11,6 +11,9 @@ namespace BPME.BPM.Host.Core.Data.Entities
     /// </summary>
     public class ProcessInstanceEntity
     {
+        /// <summary>
+        /// Первичный ключ
+        /// </summary>
         public long Id { get; set; }
 
         /// <summary>

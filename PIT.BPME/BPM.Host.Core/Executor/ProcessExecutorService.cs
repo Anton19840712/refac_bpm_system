@@ -29,6 +29,9 @@ namespace BPME.BPM.Host.Core.Executor
         private ProcessState _processState = null!;
         private object? _outputValue;
 
+        /// <summary>
+        /// Создаёт сервис выполнения процесса
+        /// </summary>
         public ProcessExecutorService(
             ILogger<ProcessExecutorService> logger,
             ILoggerFactory loggerFactory,

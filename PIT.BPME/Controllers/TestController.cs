@@ -23,6 +23,9 @@ namespace BPME.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<TestController> _logger;
 
+        /// <summary>
+        /// Создаёт контроллер тестирования
+        /// </summary>
         public TestController(
             TestRunnerService testRunner,
             StepExecutorFactory stepExecutorFactory,

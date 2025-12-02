@@ -27,6 +27,9 @@ namespace BPME.BPM.Host.Core.DataBus
         private readonly List<RabbitMqListener> _listeners = new();
         private bool _disposed;
 
+        /// <summary>
+        /// Создаёт фабрику слушателей
+        /// </summary>
         public RabbitMqListenerFactory(
             IBPMState bpmState,
             IOptions<RabbitMqOptions> options,
@@ -49,6 +52,7 @@ namespace BPME.BPM.Host.Core.DataBus
         /// </summary>
         public IReadOnlyList<string> ListeningQueues => _listeners.Select(l => l.QueueName).ToList();
 
+        /// <inheritdoc />
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             if (!_options.Enabled)
@@ -102,6 +106,7 @@ namespace BPME.BPM.Host.Core.DataBus
                 _options.Queues.Count(q => q.Enabled));
         }
 
+        /// <inheritdoc />
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Остановка всех RabbitMQ слушателей...");
@@ -123,6 +128,7 @@ namespace BPME.BPM.Host.Core.DataBus
                 logger);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (_disposed) return;

@@ -25,6 +25,9 @@ namespace BPME.BPM.Host.Core.Executor
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<BPMStateListener> _logger;
 
+        /// <summary>
+        /// Создаёт слушатель состояния BPM
+        /// </summary>
         public BPMStateListener(
             IBPMState bpmState,
             IServiceScopeFactory scopeFactory,
@@ -35,6 +38,7 @@ namespace BPME.BPM.Host.Core.Executor
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("BPMStateListener: запущен");
@@ -45,6 +49,7 @@ namespace BPME.BPM.Host.Core.Executor
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("BPMStateListener: остановлен");

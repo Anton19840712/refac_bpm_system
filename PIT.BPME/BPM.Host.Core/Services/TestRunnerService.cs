@@ -28,6 +28,9 @@ namespace BPME.BPM.Host.Core.Services
             PropertyNameCaseInsensitive = true
         };
 
+        /// <summary>
+        /// Создаёт сервис тестирования
+        /// </summary>
         public TestRunnerService(
             IConfigureService<ProcessConfig> configService,
             IBPMState bpmState,
@@ -236,10 +239,29 @@ namespace BPME.BPM.Host.Core.Services
     /// </summary>
     public class TestConfigInfo
     {
+        /// <summary>
+        /// Имя файла конфигурации
+        /// </summary>
         public string FileName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Публичный идентификатор процесса
+        /// </summary>
         public string PublicId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Название процесса
+        /// </summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Описание процесса
+        /// </summary>
         public string? Description { get; set; }
+
+        /// <summary>
+        /// Количество шагов
+        /// </summary>
         public int StepsCount { get; set; }
     }
 
@@ -248,10 +270,29 @@ namespace BPME.BPM.Host.Core.Services
     /// </summary>
     public class TestRunResult
     {
+        /// <summary>
+        /// Успешен ли запуск
+        /// </summary>
         public bool Success { get; set; }
+
+        /// <summary>
+        /// Идентификатор корреляции для отслеживания
+        /// </summary>
         public string CorrelationId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// PublicId запущенного процесса
+        /// </summary>
         public string? ProcessPublicId { get; set; }
+
+        /// <summary>
+        /// Сообщение о результате
+        /// </summary>
         public string Message { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Время запуска
+        /// </summary>
         public DateTime StartedAt { get; set; }
     }
 }

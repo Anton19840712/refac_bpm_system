@@ -27,6 +27,9 @@ namespace BPME.BPM.Host.Core.Services
         // Префикс ключей кэша для конфигураций процессов
         private const string CacheKeyPrefix = "process:";
 
+        /// <summary>
+        /// Создаёт сервис конфигурации процессов
+        /// </summary>
         public ProcessConfigService(
             IConfigureRepository<ProcessConfig> repository,
             ICacheService cache,

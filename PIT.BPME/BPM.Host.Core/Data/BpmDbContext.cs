@@ -13,6 +13,9 @@ namespace BPME.BPM.Host.Core.Data
     /// </summary>
     public class BpmDbContext : DbContext
     {
+        /// <summary>
+        /// Создаёт контекст БД
+        /// </summary>
         public BpmDbContext(DbContextOptions<BpmDbContext> options) : base(options)
         {
         }
@@ -32,6 +35,7 @@ namespace BPME.BPM.Host.Core.Data
         /// </summary>
         public DbSet<ProcessInstanceEntity> ProcessInstances { get; set; }
 
+        /// <inheritdoc />
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

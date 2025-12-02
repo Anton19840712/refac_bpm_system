@@ -15,7 +15,7 @@ namespace BPME.BPM.Host.Core.Executor.Steps
         /// <summary>
         /// Выполнить шаг
         /// </summary>
-        /// <param name="settings">Настройки шага в формате JSON</param>
+        /// <param name="settingsJson">Настройки шага в формате JSON</param>
         /// <param name="inputData">Входные данные процесса</param>
         /// <param name="cancellationToken">Токен отмены</param>
         /// <returns>Результат выполнения шага</returns>
@@ -50,9 +50,19 @@ namespace BPME.BPM.Host.Core.Executor.Steps
         /// </summary>
         public TimeSpan Duration { get; set; }
 
+        /// <summary>
+        /// Создать успешный результат
+        /// </summary>
+        /// <param name="output">Выходные данные</param>
+        /// <param name="duration">Время выполнения</param>
         public static StepExecutionResult Success(object? output = null, TimeSpan? duration = null)
             => new() { IsSuccess = true, Output = output, Duration = duration ?? TimeSpan.Zero };
 
+        /// <summary>
+        /// Создать результат с ошибкой
+        /// </summary>
+        /// <param name="errorMessage">Сообщение об ошибке</param>
+        /// <param name="duration">Время выполнения</param>
         public static StepExecutionResult Failure(string errorMessage, TimeSpan? duration = null)
             => new() { IsSuccess = false, ErrorMessage = errorMessage, Duration = duration ?? TimeSpan.Zero };
     }

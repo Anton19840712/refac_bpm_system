@@ -32,6 +32,9 @@ namespace BPME.BPM.Host.Core.Services
         // Время жизни по умолчанию — 5 минут
         private static readonly TimeSpan DefaultExpiration = TimeSpan.FromMinutes(5);
 
+        /// <summary>
+        /// Создаёт сервис кэширования
+        /// </summary>
         public InMemoryCacheService(
             IMemoryCache cache,
             ILogger<InMemoryCacheService> logger)

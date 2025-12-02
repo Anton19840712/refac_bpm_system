@@ -30,6 +30,9 @@ namespace BPME.BPM.Host.Core.DataBus
             PropertyNameCaseInsensitive = true
         };
 
+        /// <summary>
+        /// Создаёт экземпляр слушателя для одной очереди
+        /// </summary>
         public RabbitMqListener(
             IBPMState bpmState,
             RabbitMqOptions connectionOptions,
@@ -208,6 +211,7 @@ namespace BPME.BPM.Host.Core.DataBus
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (_disposed) return;

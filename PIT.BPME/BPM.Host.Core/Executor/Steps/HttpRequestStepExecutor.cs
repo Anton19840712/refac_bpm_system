@@ -18,6 +18,9 @@ namespace BPME.BPM.Host.Core.Executor.Steps
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<HttpRequestStepExecutor> _logger;
 
+        /// <summary>
+        /// Создаёт executor для HTTP-запросов
+        /// </summary>
         public HttpRequestStepExecutor(
             IHttpClientFactory httpClientFactory,
             ILogger<HttpRequestStepExecutor> logger)
@@ -26,8 +29,10 @@ namespace BPME.BPM.Host.Core.Executor.Steps
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public string StepType => "http-request";
 
+        /// <inheritdoc />
         public async Task<StepExecutionResult> ExecuteAsync(
             string? settingsJson,
             Dictionary<string, object>? inputData,
@@ -112,20 +117,60 @@ namespace BPME.BPM.Host.Core.Executor.Steps
         }
     }
 
+    /// <summary>
+    /// Конфигурация для HTTP-запроса
+    /// </summary>
     public class HttpRequestStepConfig
     {
+        /// <summary>
+        /// URL для запроса
+        /// </summary>
         public string Url { get; set; } = string.Empty;
+
+        /// <summary>
+        /// HTTP метод (GET, POST, PUT, DELETE и т.д.)
+        /// </summary>
         public string Method { get; set; } = "GET";
+
+        /// <summary>
+        /// Тело запроса
+        /// </summary>
         public string? Body { get; set; }
+
+        /// <summary>
+        /// Content-Type заголовок
+        /// </summary>
         public string? ContentType { get; set; }
+
+        /// <summary>
+        /// Дополнительные заголовки
+        /// </summary>
         public Dictionary<string, string>? Headers { get; set; }
+
+        /// <summary>
+        /// Таймаут запроса в секундах
+        /// </summary>
         public int TimeoutSeconds { get; set; } = 30;
     }
 
+    /// <summary>
+    /// Результат HTTP-запроса
+    /// </summary>
     public class HttpResponseResult
     {
+        /// <summary>
+        /// HTTP статус код ответа
+        /// </summary>
         public int StatusCode { get; set; }
+
+        /// <summary>
+        /// Тело ответа
+        /// </summary>
         public string? Body { get; set; }
+
+        /// <summary>
+        /// Успешен ли запрос (2xx статус)
+        /// </summary>
         public bool IsSuccess { get; set; }
     }
 }

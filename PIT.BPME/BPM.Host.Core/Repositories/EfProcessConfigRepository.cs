@@ -20,6 +20,9 @@ namespace BPME.BPM.Host.Core.Repositories
         private readonly BpmDbContext _context;
         private readonly ILogger<EfProcessConfigRepository> _logger;
 
+        /// <summary>
+        /// Создаёт репозиторий конфигураций
+        /// </summary>
         public EfProcessConfigRepository(
             BpmDbContext context,
             ILogger<EfProcessConfigRepository> logger)

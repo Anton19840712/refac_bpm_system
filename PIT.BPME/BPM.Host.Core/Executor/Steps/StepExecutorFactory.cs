@@ -16,6 +16,9 @@ namespace BPME.BPM.Host.Core.Executor.Steps
         private readonly Dictionary<string, IStepExecutor> _executors;
         private readonly ILogger<StepExecutorFactory> _logger;
 
+        /// <summary>
+        /// Создаёт фабрику executor'ов
+        /// </summary>
         public StepExecutorFactory(
             IEnumerable<IStepExecutor> executors,
             ILogger<StepExecutorFactory> logger)

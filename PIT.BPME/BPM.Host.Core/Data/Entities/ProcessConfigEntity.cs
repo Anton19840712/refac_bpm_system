@@ -7,6 +7,9 @@ namespace BPME.BPM.Host.Core.Data.Entities
     /// </summary>
     public class ProcessConfigEntity
     {
+        /// <summary>
+        /// Первичный ключ
+        /// </summary>
         public Guid Id { get; set; }
 
         /// <summary>

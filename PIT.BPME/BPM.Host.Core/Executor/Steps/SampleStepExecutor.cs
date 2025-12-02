@@ -25,6 +25,9 @@ namespace BPME.BPM.Host.Core.Executor.Steps
     {
         private readonly ILogger<SampleStepExecutor> _logger;
 
+        /// <summary>
+        /// Создаёт sample executor
+        /// </summary>
         public SampleStepExecutor(ILogger<SampleStepExecutor> logger)
         {
             _logger = logger;
@@ -34,8 +37,10 @@ namespace BPME.BPM.Host.Core.Executor.Steps
         /// Тип шага: "sample"
         /// При создании реального executor'а замените на свой тип.
         /// </summary>
+        /// <inheritdoc />
         public string StepType => "sample";
 
+        /// <inheritdoc />
         public async Task<StepExecutionResult> ExecuteAsync(
             string? settingsJson,
             Dictionary<string, object>? inputData,
@@ -116,7 +121,14 @@ namespace BPME.BPM.Host.Core.Executor.Steps
     /// </summary>
     public class SampleStepConfig
     {
+        /// <summary>
+        /// Сообщение для вывода
+        /// </summary>
         public string Message { get; set; } = "Sample step executed";
+
+        /// <summary>
+        /// Задержка в миллисекундах
+        /// </summary>
         public int DelayMs { get; set; } = 100;
     }
 }

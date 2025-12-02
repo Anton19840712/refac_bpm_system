@@ -22,6 +22,9 @@ namespace BPME.Controllers
         private readonly IConfigureService<ProcessConfig> _configService;
         private readonly ILogger<ConfigureController> _logger;
 
+        /// <summary>
+        /// Создаёт контроллер конфигураций
+        /// </summary>
         public ConfigureController(
             IConfigureService<ProcessConfig> configService,
             ILogger<ConfigureController> logger)
@@ -174,13 +177,44 @@ namespace BPME.Controllers
     /// </summary>
     public class ProcessConfigSummary
     {
+        /// <summary>
+        /// Внутренний идентификатор
+        /// </summary>
         public Guid Id { get; set; }
+
+        /// <summary>
+        /// Публичный идентификатор процесса
+        /// </summary>
         public string PublicId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Название процесса
+        /// </summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Описание процесса
+        /// </summary>
         public string? Description { get; set; }
+
+        /// <summary>
+        /// Версия конфигурации
+        /// </summary>
         public int Version { get; set; }
+
+        /// <summary>
+        /// Активна ли конфигурация
+        /// </summary>
         public bool IsActive { get; set; }
+
+        /// <summary>
+        /// Количество шагов в процессе
+        /// </summary>
         public int StepsCount { get; set; }
+
+        /// <summary>
+        /// Дата создания
+        /// </summary>
         public DateTime CreatedAt { get; set; }
     }
 }

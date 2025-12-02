@@ -20,6 +20,9 @@ namespace BPME.BPM.Host.Core.Repositories
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
+        /// <summary>
+        /// Создаёт репозиторий экземпляров процессов
+        /// </summary>
         public EfProcessInstanceRepository(
             BpmDbContext context,
             ILogger<EfProcessInstanceRepository> logger)

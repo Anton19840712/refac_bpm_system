@@ -22,6 +22,9 @@ namespace BPME.Controllers
         private readonly IProcessInstanceRepository _instanceRepository;
         private readonly ILogger<ProcessController> _logger;
 
+        /// <summary>
+        /// Создаёт контроллер процессов
+        /// </summary>
         public ProcessController(
             IBPMState bpmState,
             IProcessInstanceRepository instanceRepository,
@@ -176,10 +179,29 @@ namespace BPME.Controllers
     /// </summary>
     public class StartProcessResponse
     {
+        /// <summary>
+        /// Идентификатор корреляции для отслеживания запроса
+        /// </summary>
         public string CorrelationId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// PublicId запущенного процесса
+        /// </summary>
         public string ProcessPublicId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Статус запроса (Accepted, Running, Completed и т.д.)
+        /// </summary>
         public string Status { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Описание статуса
+        /// </summary>
         public string Message { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Время постановки в очередь
+        /// </summary>
         public DateTime QueuedAt { get; set; }
     }
 
@@ -188,7 +210,14 @@ namespace BPME.Controllers
     /// </summary>
     public class QueueStatusResponse
     {
+        /// <summary>
+        /// Количество запросов в очереди
+        /// </summary>
         public int PendingCount { get; set; }
+
+        /// <summary>
+        /// Время получения статуса
+        /// </summary>
         public DateTime Timestamp { get; set; }
     }
 
