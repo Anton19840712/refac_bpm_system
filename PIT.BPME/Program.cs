@@ -61,7 +61,6 @@ builder.Services.AddHttpClient();
 // Регистрация executor'ов — каждый обрабатывает свой StepType
 builder.Services.AddScoped<IStepExecutor, SampleStepExecutor>();
 builder.Services.AddScoped<IStepExecutor, HttpRequestStepExecutor>();
-builder.Services.AddScoped<IStepExecutor, ScriptStepExecutor>();
 
 // Фабрика — резолвит executor по StepType
 builder.Services.AddScoped<StepExecutorFactory>();
