@@ -1,0 +1,88 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<NoWarn>$(NoWarn);1591</NoWarn>
+	<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+	<!-- Package metadata -->
+	<PackageId>PIT.Infrastructure</PackageId>
+	<Title>PIT.Infrastructure - Comprehensive Infrastructure Package for .NET 8</Title>
+	<Description>Полнофункциональный инфраструктурный NuGet пакет для .NET 8 приложений. Включает: RFC 9457 Problem Details, структурированное логирование (Serilog), OpenTelemetry метрики и трассировка, Health Checks, Security Headers, Correlation ID для distributed tracing, Response Compression, CORS, Application Info, Sentry интеграция, Docker/Swarm/Kubernetes поддержка и многое другое. Построен на лучших практиках и чистой архитектуре.</Description>
+	<Version>1.0.2</Version>
+	<AssemblyVersion>1.0.0.2</AssemblyVersion>
+	<FileVersion>1.0.0.2</FileVersion>
+
+	<Author>PIT Dev Team</Author>
+	<Company>PIT</Company>
+	<Contact>info@pit.protei.ru</Contact>
+
+	<PackageReleaseNotes>
+	  v1.0.0 - Initial Release
+	  - RFC 9457 Problem Details error handling with typed exceptions
+	  - Serilog structured logging with automatic enrichment
+	  - OpenTelemetry metrics and distributed tracing
+	  - Health Checks (startup, readiness, liveness probes)
+	  - Security Headers (OWASP compliance)
+	  - Correlation ID for distributed tracing
+	  - Response Compression (Gzip and Brotli)
+	  - CORS configuration
+	  - Application Info endpoint
+	  - Sentry integration with profiling
+	  - Docker/Docker Swarm/Kubernetes support
+	  - CorrelationIdHttpClientHandler for automatic header propagation
+	  - Complete documentation and examples
+	</PackageReleaseNotes>
+
+  </PropertyGroup>
+
+
+  <ItemGroup>
+	<!-- Базовые зависимости ASP.NET Core для доступа к DI, HttpContext и т.д. -->
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
+
+	<!-- FluentValidation для обработки ошибок валидации -->
+	<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+	<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.4" />
+
+	<!-- Serilog для структурированного логирования -->
+	<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+	<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+	<PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+	<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
+	<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+
+	<!-- OpenTelemetry (OTL) для метрик и мониторинга -->
+	<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.13.1" />
+	<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
+	<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.14.0" />
+
+
+	<!-- Health Checks и UI -->
+	<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+	<PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+
+	<!-- Sentry для отслеживания ошибок и производительности -->
+	<PackageReference Include="Sentry.AspNetCore" Version="5.16.2" />
+	<PackageReference Include="Sentry.Serilog" Version="5.16.2" />
+	<PackageReference Include="Sentry.Profiling" Version="5.16.2" />
+
+	  <!-- Swagger для Open API -->
+	<PackageReference Include="Scalar.AspNetCore" Version="2.11.0" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />	
+	<PackageReference Include="System.Text.Encodings.Web" Version="10.0.0" />
+	<PackageReference Include="System.Text.Json" Version="10.0.0" />
+
+  </ItemGroup>
+
+</Project>

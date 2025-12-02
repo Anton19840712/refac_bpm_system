@@ -1,0 +1,29 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PIT.Infrastructure", "PIT.Infrastructure.csproj", "{7D5DC447-E6AF-4035-B667-99455517F804}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D5DC447-E6AF-4035-B667-99455517F804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D5DC447-E6AF-4035-B667-99455517F804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D5DC447-E6AF-4035-B667-99455517F804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D5DC447-E6AF-4035-B667-99455517F804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE33D33F-F3AD-495C-9391-F6474D845B2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE33D33F-F3AD-495C-9391-F6474D845B2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE33D33F-F3AD-495C-9391-F6474D845B2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE33D33F-F3AD-495C-9391-F6474D845B2C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B8113EA-13DD-4C0D-A041-2C0656396E7D}
+	EndGlobalSection
+EndGlobal
